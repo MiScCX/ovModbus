@@ -1,0 +1,323 @@
+#                                                  #
+#      ovNodbus.py  Modbus Analyzer and Output     #
+#                                                  #
+#      Copyright 2023 MiSc                         #
+#      Shout-out to "final"                        #
+#                                                  #
+#      This code is licensed under the GPL         #
+#                                                  #
+
+import json
+import re
+import argparse
+import pymodbus.client as modbusClient
+from pymodbus.exceptions import ModbusIOException
+
+# Define constants
+DEFAULT_HOST = '127.0.0.1'
+DEFAULT_PORT = 502
+DEFAULT_SLAVE = 247
+DEFAULT_START_ADDRESS = 12288
+DEFAULT_STOP_ADDRESS = 18408
+DEFAULT_LANG = 'default'
+
+JSON_UNITS = 'ovUnits.json'
+JSON_DESCRIPTOR = 'ovDescriptor.json'
+JSON_TYPEMAP = 'ovTypeMap.json'
+
+HASS_MODBUS_NAME = 'ovum_modbus'
+
+# Create YAML for Home Assistant with all sensors based on modbus
+def get_hass_modbustcp_def(data):
+    config_string = f"""modbus:
+    - name: "modbus_ovum"
+      type: tcp
+      host: {data['host']}
+      port: {data['port']}
+      delay: 2
+      message_wait_milliseconds: 0
+      retries: 3
+      timeout: 5
+      sensors:"""
+    return (config_string)
+
+def get_hass_sensor_def(data):
+    sensor_string = f"""
+        - name: "{data['description']}"         
+          unique_id: ovum_{data['parameter']}_sensor{data['address']}
+          address: {data['address']}
+          lazy_error_count: 2                
+          scan_interval: 15                
+          data_type: int32
+          scale: {data['scale']}
+          precision: {data['precision']}
+          swap: word
+          unit_of_measurement: "{data['unit']}"
+          input_type: holding
+          min_value: {data['min_val']}
+          max_value: {data['max_val']}
+          slave: {data['slave']}                    
+          {data['device_class']}"""
+    return f"{sensor_string}"
+
+def get_hass_binsensor_def(data):
+    sensor_string = f"""
+        - name: "{data['description']}"         
+          unique_id: ovum_{data['parameter']}_sensor{data['address']}
+          address: {data['address']}
+          lazy_error_count: 2                
+          scan_interval: 15                
+          input_type: holding
+          slave: {data['slave']}"""
+    return f"{sensor_string}"
+
+def get_hass_templatesensor_def(data):
+    sensor_string = f"""
+        - sensor:
+            - name: "{data['description']}"
+              unique_id: ovum_{data['parameter']}_template
+              device_class: enum
+              availability: '{{ states('{data['sensor']}')|int in [{data['range']}] }}'
+              state: >
+                {{% set mapper =  {{
+                    {data['map']}
+                    }} 
+                %}}            
+                {{% 
+                    set state =  states('{data['sensor']}') 
+                %}}
+                {{{{ mapper[state] if state in mapper}}}}"""
+    return f"{sensor_string}"
+
+# Load JSON
+def load_json(filename):
+    try:
+        with open(filename, "r") as file:
+            return json.load(file)
+    except FileNotFoundError:
+        print(f'Error: {filename} file not found')
+        return {}
+
+# Initial Setup, call-arguments, load json-files
+def init_parser():
+    parser = argparse.ArgumentParser()
+    parser.add_argument('host', type=str, default=DEFAULT_HOST, help='The IP address of the Modbus TCP host')
+    parser.add_argument('port', type=int, default=DEFAULT_PORT, help='The TCP-Port of the Modbus TCP host')
+    parser.add_argument('slave', type=int, default=DEFAULT_SLAVE, help='The Modbus-Address (Slave)')
+    parser.add_argument('--lang', type=str, default=DEFAULT_LANG, help='Language Selector (de, en, ...)')
+    parser.add_argument('--start_address', type=int, default=DEFAULT_START_ADDRESS, help='Start address of the register')
+    parser.add_argument('--stop_address', type=int, default=DEFAULT_STOP_ADDRESS, help='Stop address of the register')
+    parser.add_argument('--dump', action='store_true', help='Loop through addresses and dump content')
+    parser.add_argument('--csv', action='store_true', help='Output is in CSV-Format')
+    parser.add_argument('--hass', action='store_true', help='Create Home Assistant YAML for sensors')
+    parser.add_argument('--min', action='store_true', help='Create minimal output')
+    parser.add_argument('--noerror', action='store_true', help='Skip addresses with error and do not print')
+    return parser
+
+# Connect to Modbus TCP
+def connect_to_modbusTCP(host, port):
+    client = modbusClient.ModbusTcpClient(host=host, port=port)
+    try:
+        client.connect()
+        return client, client.is_socket_open()
+    except ModbusIOException as e:
+        print(f"Failed to connect to host: {host}")
+        print("Error:", e)
+        return None, False
+
+# Add Space after (n) characters
+def format_space(input_string, n):
+    result = ' '.join([input_string[i:i + n] for i in range(0, len(input_string), n)])
+    return result.strip()
+
+def read_register(address, count, slave):
+    response = []
+    try:
+        register_content = client.read_holding_registers(address, count, slave)
+        if register_content.isError():
+            return response, True
+        else:
+            for i in range(0, len(register_content.registers)):
+                hex = format(register_content.registers[i], '04X')
+                dec_unsigned = int(hex, 16)
+                if dec_unsigned & 0x8000:
+                    dec_signed = -((dec_unsigned^0xFFFF)+1)
+                else:
+                    dec_signed = dec_unsigned
+                byte1 = int(hex[:2], 16)
+                byte2 = int(hex[-2:], 16)
+                char1 = chr(byte1) if (31 < byte1 < 127) and (31 < byte2 < 127) else ""
+                char2 = chr(byte2) if (31 < byte1 < 127) and (31 < byte2 < 127) else ""
+                bin = format(register_content.registers[i], '016b')
+                address_dec = address+i
+                data = {"address_hex": f"{address_dec:#0{6}x}", "address": f"{address +i}", "hex": f"{hex}", "byte1": f"{byte1}", "byte2": f"{byte2}", "UInt16": f"{dec_unsigned}", "Int16": f"{dec_signed}", "char1": f"{char1}", "char2": f"{char2}", "bin": f"{bin}"}
+                response.append(data)
+            return response, False
+    except ModbusIOException as e:
+        return response, True
+
+def generateRegisterDump(start_address, stop_address, slave, separator, noerror):
+    header_titles = ["Idx", "AddrHex", "AddrDec", "Hex", "Byte_1", "Byte_2", "UInt16", "Int16", "Chr", "Bin"]
+    read_count = 1
+    idx = start_address
+    print(separator.join(header_titles))
+    while idx <= stop_address:
+        response, error = read_register(idx, read_count, slave)
+        if not error:
+            data = [f"{idx-start_address}", f"{response[0]['address_hex']}", f"{response[0]['address']}", f"{format_space(response[0]['hex'],2)}", f"{response[0]['byte1']}", f"{response[0]['byte2']}", f"{response[0]['UInt16']}", f"{response[0]['Int16']}", f"{response[0]['char1']}{response[0]['char2']}",f"{format_space(response[0]['bin'],4)}"]
+        else:
+            data = [f"{idx}"]
+            for _ in range(1, len(header_titles)): data.append("#err")
+        if not (error and noerror):
+          print(separator.join(data))
+        idx += read_count
+
+def generateOvumDump(start_address, stop_address, slave, separator, lang, min, noerror):
+    header_titles = ["AddrHex", "AddrDec", "Param", "Int32", "Prec", "Value", "Unit", "UnitID", "MultiID", "MinVal", "MaxVal", "ReadOnly", "isMenu", "DescID", "Desc"]
+    header_titles_min = ["Param", "Value", "Unit", "Desc"]
+    tab_size = 16
+    read_count = 10
+    idx = start_address
+    if min:
+        print(separator.join(header_titles_min).expandtabs(tab_size))
+    else:
+        print(separator.join(header_titles).expandtabs(tab_size))
+    while idx <= stop_address:
+        response, error = read_register(idx, read_count, slave)
+        if not error:
+            address_hex = response[0]['address_hex']
+            address = response[0]['address']
+            parameter = f"{response[6]['char1']}{response[6]['char2']}{response[7]['char1']}{response[7]['char2']}"
+            is_not_menu = (int(response[5]['bin'][0], 2) == 0)
+            is_readonly = (int(response[5]['bin'][1], 2) == 0) if is_not_menu else ""
+            if is_not_menu:
+                value = int(f"{response[1]['hex']}{response[0]['hex']}", 16)
+                if value & 0x80000000:
+                    value = -((value ^ 0xFFFFFFFF) + 1)
+            else:
+                value = ""
+            precision = int(response[4]['bin'][:4], 2) if is_not_menu else ""
+            value_float = round(value * 10 ** (-precision), precision) if is_not_menu else ""
+            unit_id = int(response[4]['bin'][-7:], 2) if is_not_menu else ""
+            unit_text = units.get(f'{unit_id}', {}).get('expected', '') if is_not_menu else ""
+            multi_id = response[9]['UInt16'] if (is_not_menu and (response[9]['UInt16'] != "0")) else ""
+            if is_not_menu:
+                min_val = response[2]['Int16']
+                max_val = response[3]['Int16']
+                if max_val < min_val:
+                    max_val = response[3]['UInt16']
+            else:
+                min_val = ""
+                max_val = ""
+            descriptor_id = response[8]['UInt16']
+            matching_item = next((item for item in descriptor if f"{item['iddescriptor']}" == descriptor_id),None)
+            descriptor_text = matching_item.get("tlangalphakey", {}).get(lang, "") if matching_item else ""
+            if (multi_id != ""):
+                for item in typeMap:
+                    if f"{multi_id}" in item:
+                        for tvalue in item[f"{multi_id}"]["tvalues"]:
+                            if tvalue["in_INPUT"] == value:
+                                value_float = tvalue["alphakey"][lang]
+                                break
+                        else:
+                            value_float = ""
+                        break
+                else:
+                    value_float = ""
+            if min:
+                data = [f"{parameter}", f"{value_float}", f"{unit_text}",f"{descriptor_text}"]
+            else:
+                data = [f"{address_hex}", f"{address}", f"{parameter}", f"{value}", f"{precision}", f"{value_float}", f"{unit_text}", f"{unit_id}", f"{multi_id}" ,f"{min_val}",f"{max_val}", f"{is_readonly}", f"{is_not_menu==False}", f"{descriptor_id}", f"{descriptor_text}"]
+        else:
+            data = [f"{idx}"]
+            for _ in range(1, len(header_titles)): data.append("#err")
+        if not (error and noerror):
+          print(separator.join(data).expandtabs(tab_size))
+        idx += read_count
+
+def generateOvumHASS(host, port, start_address, stop_address, slave, lang):
+    data = {"host": f"{host}", "port": f"{port}"}
+    print(get_hass_modbustcp_def(data))
+    read_count = 10
+    idx = start_address
+    sensor_str = ""
+    binsens_str = "      binary_sensors:\n"
+    tempsens_str = "template:\n"
+    last_menu = ""
+    while idx <= stop_address:
+        response, error = read_register(idx, read_count, slave)
+        if not error:
+            is_not_menu = (int(response[5]['bin'][0], 2) == 0)
+            parameter = re.sub(r'[^a-zA-Z0-9]', '',f"{response[6]['char1']}{response[6]['char2']}{response[7]['char1']}{response[7]['char2']}")
+            parameter = parameter.strip()
+            descriptor_id = response[8]['UInt16']
+            matching_item = next((item for item in descriptor if f"{item['iddescriptor']}" == descriptor_id), None)
+            descriptor_text = matching_item.get("tlangalphakey", {}).get(lang, "") if matching_item else ""
+            if is_not_menu:
+                address = response[0]['address']
+                precision = int(response[4]['bin'][:4], 2)
+                scale = round(1 * 10 ** (-precision), precision)
+                descriptor_text = f"{last_menu}: {descriptor_text} ({parameter} #{address})"
+                unit_id = int(response[4]['bin'][-7:], 2)
+                unit_text = units.get(f'{unit_id}', {}).get('default', '')
+                if unit_text == "": unit_text = units.get(f'{unit_id}', {}).get('expected', '')
+                deviceclass_text = units.get(f'{unit_id}', {}).get('device_class', '')
+                deviceclass_text = f"device_class: {deviceclass_text}" if (deviceclass_text != "None") and (deviceclass_text.strip() != "") else ""
+                if is_not_menu:
+                    min_val = response[2]['Int16']
+                    max_val = response[3]['Int16']
+                    if max_val < min_val:
+                        max_val = response[3]['UInt16']
+                else:
+                    min_val = ""
+                    max_val = ""
+                isBinary = True if ((min_val == "0") and (max_val == "1")) else False
+
+                multi_id = response[9]['UInt16'] if (is_not_menu and (response[9]['UInt16'] != "0")) else ""
+                isEnumValue = True if (multi_id != "") else False
+                if isEnumValue:
+                    isEnumValue = isEnumValue
+                    ### TODO: Data bauen
+                    #typeMapObject = next((item for item in typeMap if f"{multi_id}" in item), {})
+                    #tvalues_list = typeMapObject.get(f"{multi_id}", {}).get("tvalues", [])
+                    #if value < len(tvalues_list):
+                        #value_float = tvalues_list[value].get("alphakey", {}).get(lang, "")
+
+                data = {"sensor": "", "range": "", "map": "", "slave": f"{slave}", "description": f"{descriptor_text.strip()}", "parameter": f"{parameter}", "address": f"{address}", "scale": f"{scale}", "precision": f"{precision}", "unit": f"{unit_text}", "device_class": f"{deviceclass_text}", "min_val": f"{min_val}", "max_val": f"{max_val}"}
+                if isBinary:
+                    binsens_str += f"{get_hass_binsensor_def(data)}\n"
+                else:
+                    sensor_str += f"{get_hass_sensor_def(data)}\n"
+#                if isEnumValue:
+#                    tempsens_str += f"{get_hass_templatesensor_def(data)}\n"
+            else:
+                last_menu = descriptor_text.capitalize()
+        idx += read_count
+    print(sensor_str)
+    print(binsens_str)
+    print(tempsens_str)
+
+# Main function to call after script starts
+def main():
+    global args, client, descriptor, units, typeMap
+
+    args = init_parser().parse_args()
+    descriptor = load_json(JSON_DESCRIPTOR)
+    units = load_json(JSON_UNITS)
+    typeMap = load_json(JSON_TYPEMAP)
+    separator = ';' if args.csv else '\t'
+
+    client, is_connected = connect_to_modbusTCP(args.host, args.port)
+
+    if args.dump:
+        generateRegisterDump(args.start_address, args.stop_address, args.slave, separator, args.noerror)
+    elif args.hass:
+        generateOvumHASS(args.host, args.port, args.start_address, args.stop_address, args.slave, args.lang)
+    else:
+        generateOvumDump(args.start_address, args.stop_address, args.slave, separator, args.lang, args.min, args.noerror)
+
+    if client: client.close()
+
+# Main Call
+if __name__ == "__main__":
+    main()
