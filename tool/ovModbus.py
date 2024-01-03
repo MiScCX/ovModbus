@@ -42,7 +42,7 @@ def get_hass_modbustcp_def(data):
 
 def get_hass_sensor_def(data):
     sensor_string = f"""
-        - name: "{data['description']}"         
+        - name: "{data['description']}"
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
           scan_interval: 15                
@@ -54,17 +54,17 @@ def get_hass_sensor_def(data):
           input_type: holding
           min_value: {data['min_val']}
           max_value: {data['max_val']}
-          slave: {data['slave']}                    
+          slave: {data['slave']}
           {data['device_class']}"""
     return f"{sensor_string}"
 
 def get_hass_binsensor_def(data):
     sensor_string = f"""
-        - name: "{data['description']}"         
+        - name: "{data['description']}"
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
-          lazy_error_count: 2                
-          scan_interval: 15                
+          lazy_error_count: 2
+          scan_interval: 15
           input_type: holding
           slave: {data['slave']}"""
     return f"{sensor_string}"
@@ -79,10 +79,10 @@ def get_hass_templatesensor_def(data):
               state: >
                 {{% set mapper =  {{
                     {data['map']}
-                    }} 
-                %}}            
-                {{% 
-                    set state =  states('{data['sensor']}') 
+                    }}
+                %}}
+                {{%
+                    set state =  states('{data['sensor']}')
                 %}}
                 {{{{ mapper[state] if state in mapper}}}}"""
     return f"{sensor_string}"
