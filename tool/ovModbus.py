@@ -45,7 +45,7 @@ def get_hass_sensor_def(data):
         - name: "{data['description']}"
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
-          scan_interval: 15                
+          scan_interval: 15
           data_type: int32
           scale: {data['scale']}
           precision: {data['precision']}
@@ -63,7 +63,6 @@ def get_hass_binsensor_def(data):
         - name: "{data['description']}"
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
-          lazy_error_count: 2
           scan_interval: 15
           input_type: holding
           slave: {data['slave']}"""
