@@ -36,7 +36,6 @@ def get_hass_modbustcp_def(data):
       port: {data['port']}
       delay: 2
       message_wait_milliseconds: 0
-      retries: 3
       timeout: 5
       sensors:"""
     return (config_string)
@@ -46,7 +45,6 @@ def get_hass_sensor_def(data):
         - name: "{data['description']}"         
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
-          lazy_error_count: 2                
           scan_interval: 15                
           data_type: int32
           scale: {data['scale']}
