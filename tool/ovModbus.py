@@ -14,8 +14,17 @@ import pymodbus.client as modbusClient
 from pymodbus.exceptions import ModbusIOException
 
 # Define constants
+METHOD_TCP = 'TCP'
+METHOD_RTU = 'RTU'
+
 DEFAULT_HOST = '127.0.0.1'
 DEFAULT_PORT = 502
+
+DEFAULT_COMPORT = '/dev/ttyUSB0'
+DEFAULT_BAUDRATE = 19200
+DEFAULT_PARITY = 'E'
+DEFAULT_STOPBITS = 1
+
 DEFAULT_SLAVE = 247
 DEFAULT_START_ADDRESS = 12288
 DEFAULT_STOP_ADDRESS = 18408
@@ -99,9 +108,14 @@ def load_json(filename):
 # Initial Setup, call-arguments, load json-files
 def init_parser():
     parser = argparse.ArgumentParser()
-    parser.add_argument('host', type=str, default=DEFAULT_HOST, help='The IP address of the Modbus TCP host')
-    parser.add_argument('port', type=int, default=DEFAULT_PORT, help='The TCP-Port of the Modbus TCP host')
+    parser.add_argument('method', type=str, default=METHOD_TCP, help='How to connect: TCP or RTU')
     parser.add_argument('slave', type=int, default=DEFAULT_SLAVE, help='The Modbus-Address (Slave)')
+    parser.add_argument('--host', type=str, default=DEFAULT_HOST, help='The IP address of the Modbus TCP host')
+    parser.add_argument('--port', type=int, default=DEFAULT_PORT, help='The TCP-Port of the Modbus TCP host')
+    parser.add_argument('--comport', type=str, default=DEFAULT_COMPORT, help='The COM Port Device')
+    parser.add_argument('--baudrate', type=int, default=DEFAULT_BAUDRATE, help='Baudrate for RTU Connection')
+    parser.add_argument('--parity', type=str, default=DEFAULT_PARITY, help='Parity for RTU Connection')
+    parser.add_argument('--stopbits', type=int, default=DEFAULT_STOPBITS, help='Stopbits for RTU Connection')
     parser.add_argument('--lang', type=str, default=DEFAULT_LANG, help='Language Selector (de, en, ...)')
     parser.add_argument('--start_address', type=int, default=DEFAULT_START_ADDRESS, help='Start address of the register')
     parser.add_argument('--stop_address', type=int, default=DEFAULT_STOP_ADDRESS, help='Stop address of the register')
@@ -119,7 +133,18 @@ def connect_to_modbusTCP(host, port):
         client.connect()
         return client, client.is_socket_open()
     except ModbusIOException as e:
-        print(f"Failed to connect to host: {host}")
+        print(f"Failed to connect to tcp host: {host}")
+        print("Error:", e)
+        return None, False
+
+# Connect to Modbus RTU
+def connect_to_modbusRTU(comport, baudrate, parity, stopbits):
+    client = modbusClient.ModbusSerialClient(port=comport, baudrate=baudrate, parity=parity, stopbits=stopbits)
+    try:
+        client.connect()
+        return client, client.is_socket_open()
+    except ModbusIOException as e:
+        print(f"Failed to connect to rtu port: {comport}")
         print("Error:", e)
         return None, False
 
@@ -305,7 +330,10 @@ def main():
     typeMap = load_json(JSON_TYPEMAP)
     separator = ';' if args.csv else '\t'
 
-    client, is_connected = connect_to_modbusTCP(args.host, args.port)
+    if args.method == METHOD_RTU:
+        client, is_connected = connect_to_modbusRTU(args.comport, args.baudrate, args.parity, args.stopbits)
+    else:
+        client, is_connected = connect_to_modbusTCP(args.host, args.port)
 
     if args.dump:
         generateRegisterDump(args.start_address, args.stop_address, args.slave, separator, args.noerror)
