@@ -12,6 +12,7 @@ import re
 import argparse
 import pymodbus.client as modbusClient
 from pymodbus.exceptions import ModbusIOException
+from slugify import slugify
 
 # Define constants
 DEFAULT_HOST = '127.0.0.1'
@@ -58,32 +59,17 @@ def get_hass_sensor_def(data):
           {data['device_class']}"""
     return f"{sensor_string}"
 
-def get_hass_binsensor_def(data):
-    sensor_string = f"""
-        - name: "{data['description']}"         
-          unique_id: ovum_{data['parameter']}_sensor{data['address']}
-          address: {data['address']}
-          lazy_error_count: 2                
-          scan_interval: 15                
-          input_type: holding
-          slave: {data['slave']}"""
-    return f"{sensor_string}"
-
 def get_hass_templatesensor_def(data):
     sensor_string = f"""
         - sensor:
-            - name: "{data['description']}"
-              unique_id: ovum_{data['parameter']}_template
+            - name: "{data['description']} tmpl"
+              unique_id: ovum_{data['parameter']}_sensor{data['address']}_tmpl            
               device_class: enum
-              availability: '{{ states('{data['sensor']}')|int in [{data['range']}] }}'
+              availability: "{{{{ states('sensor.{data['sensor']}')|int in [{data['range']}] }}}}"
               state: >
                 {{% set mapper =  {{
-                    {data['map']}
-                    }} 
-                %}}            
-                {{% 
-                    set state =  states('{data['sensor']}') 
-                %}}
+                    {data['map']} }} %}}            
+                {{% set state = states('sensor.{data['sensor']}') %}}
                 {{{{ mapper[state] if state in mapper}}}}"""
     return f"{sensor_string}"
 
@@ -95,6 +81,22 @@ def load_json(filename):
     except FileNotFoundError:
         print(f'Error: {filename} file not found')
         return {}
+
+def save_output(filename, content, init=False):
+    try:
+        mode = "w" if init else "a"
+        with open(filename, mode, encoding='UTF-8') as file:
+            file.write(content)
+    except PermissionError:
+        print(f"Error: You do not have permission to write to '{filename}'.")
+    except Exception as e:
+        print(f"An unexpected error occurred: {e}")
+
+def generate_output(output):
+    if args.output != None:
+        save_output(args.output, output)
+    else:
+        print(output)
 
 # Initial Setup, call-arguments, load json-files
 def init_parser():
@@ -110,6 +112,8 @@ def init_parser():
     parser.add_argument('--hass', action='store_true', help='Create Home Assistant YAML for sensors')
     parser.add_argument('--min', action='store_true', help='Create minimal output')
     parser.add_argument('--noerror', action='store_true', help='Skip addresses with error and do not print')
+    parser.add_argument('--output', type=str, help='Write output to a file')
+    parser.add_argument('--dev', action='store_true', default=None, help='Debugging and test parameter')
     return parser
 
 # Connect to Modbus TCP
@@ -158,7 +162,7 @@ def generateRegisterDump(start_address, stop_address, slave, separator, noerror)
     header_titles = ["Idx", "AddrHex", "AddrDec", "Hex", "Byte_1", "Byte_2", "UInt16", "Int16", "Chr", "Bin"]
     read_count = 1
     idx = start_address
-    print(separator.join(header_titles))
+    generate_output(separator.join(header_titles))
     while idx <= stop_address:
         response, error = read_register(idx, read_count, slave)
         if not error:
@@ -167,7 +171,7 @@ def generateRegisterDump(start_address, stop_address, slave, separator, noerror)
             data = [f"{idx}"]
             for _ in range(1, len(header_titles)): data.append("#err")
         if not (error and noerror):
-          print(separator.join(data))
+          generate_output(separator.join(data))
         idx += read_count
 
 def generateOvumDump(start_address, stop_address, slave, separator, lang, min, noerror):
@@ -177,9 +181,9 @@ def generateOvumDump(start_address, stop_address, slave, separator, lang, min, n
     read_count = 10
     idx = start_address
     if min:
-        print(separator.join(header_titles_min).expandtabs(tab_size))
+        generate_output(separator.join(header_titles_min).expandtabs(tab_size))
     else:
-        print(separator.join(header_titles).expandtabs(tab_size))
+        generate_output(separator.join(header_titles).expandtabs(tab_size))
     while idx <= stop_address:
         response, error = read_register(idx, read_count, slave)
         if not error:
@@ -230,17 +234,16 @@ def generateOvumDump(start_address, stop_address, slave, separator, lang, min, n
             data = [f"{idx}"]
             for _ in range(1, len(header_titles)): data.append("#err")
         if not (error and noerror):
-          print(separator.join(data).expandtabs(tab_size))
+          generate_output(separator.join(data).expandtabs(tab_size))
         idx += read_count
 
 def generateOvumHASS(host, port, start_address, stop_address, slave, lang):
     data = {"host": f"{host}", "port": f"{port}"}
-    print(get_hass_modbustcp_def(data))
+    generate_output(get_hass_modbustcp_def(data))
     read_count = 10
     idx = start_address
     sensor_str = ""
-    binsens_str = "      binary_sensors:\n"
-    tempsens_str = "template:\n"
+    tempsens_str = "      template:\n"
     last_menu = ""
     while idx <= stop_address:
         response, error = read_register(idx, read_count, slave)
@@ -256,6 +259,7 @@ def generateOvumHASS(host, port, start_address, stop_address, slave, lang):
                 precision = int(response[4]['bin'][:4], 2)
                 scale = round(1 * 10 ** (-precision), precision)
                 descriptor_text = f"{last_menu}: {descriptor_text} ({parameter} #{address})"
+                sensor = slugify(descriptor_text, separator="_")
                 unit_id = int(response[4]['bin'][-7:], 2)
                 unit_text = units.get(f'{unit_id}', {}).get('default', '')
                 if unit_text == "": unit_text = units.get(f'{unit_id}', {}).get('expected', '')
@@ -269,31 +273,31 @@ def generateOvumHASS(host, port, start_address, stop_address, slave, lang):
                 else:
                     min_val = ""
                     max_val = ""
-                isBinary = True if ((min_val == "0") and (max_val == "1")) else False
-
                 multi_id = response[9]['UInt16'] if (is_not_menu and (response[9]['UInt16'] != "0")) else ""
                 isEnumValue = True if (multi_id != "") else False
+                map = ""
+                range = ""
                 if isEnumValue:
-                    isEnumValue = isEnumValue
-                    ### TODO: Data bauen
-                    #typeMapObject = next((item for item in typeMap if f"{multi_id}" in item), {})
-                    #tvalues_list = typeMapObject.get(f"{multi_id}", {}).get("tvalues", [])
-                    #if value < len(tvalues_list):
-                        #value_float = tvalues_list[value].get("alphakey", {}).get(lang, "")
+                    for item in typeMap:
+                        if f"{multi_id}" in item:
+                            for tvalue in item[f"{multi_id}"]["tvalues"]:
+                                if len(map) > 0: map += ",\n" + "\t\t\t\t\t"
+                                map += "'" + str(tvalue["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
+                                if len(range) > 0: range += ","
+                                range += str(tvalue["in_INPUT"])
 
-                data = {"sensor": "", "range": "", "map": "", "slave": f"{slave}", "description": f"{descriptor_text.strip()}", "parameter": f"{parameter}", "address": f"{address}", "scale": f"{scale}", "precision": f"{precision}", "unit": f"{unit_text}", "device_class": f"{deviceclass_text}", "min_val": f"{min_val}", "max_val": f"{max_val}"}
-                if isBinary:
-                    binsens_str += f"{get_hass_binsensor_def(data)}\n"
-                else:
-                    sensor_str += f"{get_hass_sensor_def(data)}\n"
-#                if isEnumValue:
-#                    tempsens_str += f"{get_hass_templatesensor_def(data)}\n"
+                data = {"sensor": f"{sensor}", "range": f"{range}", "map": f"{map}", "slave": f"{slave}", "description": f"{descriptor_text.strip()}", "parameter": f"{parameter}", "address": f"{address}", "scale": f"{scale}", "precision": f"{precision}", "unit": f"{unit_text}", "device_class": f"{deviceclass_text}", "min_val": f"{min_val}", "max_val": f"{max_val}"}
+                sensor_str += f"{get_hass_sensor_def(data)}\n"
+                if isEnumValue and (len(range)>0):
+                    tempsens_str += f"{get_hass_templatesensor_def(data)}\n"
             else:
                 last_menu = descriptor_text.capitalize()
         idx += read_count
-    print(sensor_str)
-    print(binsens_str)
-    print(tempsens_str)
+    generate_output(sensor_str)
+    generate_output(tempsens_str)
+
+def doDevThings(lang):
+    return None
 
 # Main function to call after script starts
 def main():
@@ -307,10 +311,14 @@ def main():
 
     client, is_connected = connect_to_modbusTCP(args.host, args.port)
 
+    if (len(args.output) > 0): save_output(args.output, "", True)
+
     if args.dump:
         generateRegisterDump(args.start_address, args.stop_address, args.slave, separator, args.noerror)
     elif args.hass:
         generateOvumHASS(args.host, args.port, args.start_address, args.stop_address, args.slave, args.lang)
+    elif args.dev:
+        doDevThings(args.lang)
     else:
         generateOvumDump(args.start_address, args.stop_address, args.slave, separator, args.lang, args.min, args.noerror)
 
