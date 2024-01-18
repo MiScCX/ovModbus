@@ -50,6 +50,19 @@ def get_hass_modbustcp_def(data):
       sensors:"""
     return (config_string)
 
+def get_hass_modbusrtu_def(data):
+    config_string = f"""modbus:
+    - name: "modbus_ovum"
+      type: serial
+      port: {data['comport']}
+      baudrate: {data['baudrate']}
+      bytesize: 8
+      method: rtu
+      parity: {data['parity']}
+      stopbits: {data['stopbits']}      
+      sensors:"""
+    return (config_string)
+
 def get_hass_sensor_def(data):
     sensor_string = f"""
         - name: "{data['description']}"         
@@ -262,9 +275,26 @@ def generateOvumDump(start_address, stop_address, slave, separator, lang, min, n
           generate_output(separator.join(data).expandtabs(tab_size))
         idx += read_count
 
-def generateOvumHASS(host, port, start_address, stop_address, slave, lang):
-    data = {"host": f"{host}", "port": f"{port}"}
-    generate_output(get_hass_modbustcp_def(data))
+def get_hass_modbusrtu_def(data):
+    config_string = f"""modbus:
+    - name: "modbus_ovum"
+      type: serial
+      port: {data['comport']}
+      baudrate: {data['baudrate']}
+      bytesize: 8
+      method: rtu
+      parity: {data['parity']}
+      stopbits: {data['stopbits']}      
+      sensors:"""
+    return (config_string)
+
+def generateOvumHASS(start_address, stop_address, slave, lang):
+    if args.method == METHOD_TCP:
+        data = {"host": f"{args.host}", "port": f"{args.port}"}
+        generate_output(get_hass_modbustcp_def(data))
+    if args.method == METHOD_RTU:
+        data = {"comport": f"{args.comport}", "baudrate": f"{args.baudrate}", "parity": f"{args.parity}", "stopbits": f"{args.stopbits}"}
+        generate_output(get_hass_modbusrtu_def(data))
     read_count = 10
     idx = start_address
     sensor_str = ""
@@ -344,7 +374,7 @@ def main():
     if args.dump:
         generateRegisterDump(args.start_address, args.stop_address, args.slave, separator, args.noerror)
     elif args.hass:
-        generateOvumHASS(args.host, args.port, args.start_address, args.stop_address, args.slave, args.lang)
+        generateOvumHASS(args.start_address, args.stop_address, args.slave, args.lang)
     elif args.dev:
         doDevThings(args.lang)
     else:
