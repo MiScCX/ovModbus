@@ -43,10 +43,10 @@ def get_hass_modbustcp_def(data):
 
 def get_hass_sensor_def(data):
     sensor_string = f"""
-        - name: "{data['description']}"         
+        - name: "{data['description']}"
           unique_id: ovum_{data['parameter']}_sensor{data['address']}
           address: {data['address']}
-          scan_interval: 15                
+          scan_interval: 15
           data_type: int32
           scale: {data['scale']}
           precision: {data['precision']}
@@ -55,7 +55,7 @@ def get_hass_sensor_def(data):
           input_type: holding
           min_value: {data['min_val']}
           max_value: {data['max_val']}
-          slave: {data['slave']}                    
+          slave: {data['slave']}
           {data['device_class']}"""
     return f"{sensor_string}"
 
