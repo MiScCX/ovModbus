@@ -139,8 +139,8 @@ def init_parser():
     parser.add_argument('--hass', action='store_true', help='Create Home Assistant YAML for sensors')
     parser.add_argument('--min', action='store_true', help='Create minimal output')
     parser.add_argument('--noerror', action='store_true', help='Skip addresses with error and do not print')
-    parser.add_argument('--output', type=str, help='Write output to a file')
-    parser.add_argument('--dev', action='store_true', default=None, help='Debugging and test parameter')
+    parser.add_argument('--output', type=str, default=None, help='Write output to a file')
+    parser.add_argument('--dev', action='store_true', help='Debugging and test parameter')
     return parser
 
 # Connect to Modbus TCP
