@@ -275,19 +275,6 @@ def generateOvumDump(start_address, stop_address, slave, separator, lang, min, n
           generate_output(separator.join(data).expandtabs(tab_size))
         idx += read_count
 
-def get_hass_modbusrtu_def(data):
-    config_string = f"""modbus:
-    - name: "modbus_ovum"
-      type: serial
-      port: {data['comport']}
-      baudrate: {data['baudrate']}
-      bytesize: 8
-      method: rtu
-      parity: {data['parity']}
-      stopbits: {data['stopbits']}      
-      sensors:"""
-    return (config_string)
-
 def generateOvumHASS(start_address, stop_address, slave, lang):
     if args.method == METHOD_TCP:
         data = {"host": f"{args.host}", "port": f"{args.port}"}
