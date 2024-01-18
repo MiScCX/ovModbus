@@ -356,7 +356,7 @@ def main():
     else:
         client, is_connected = connect_to_modbusTCP(args.host, args.port)
 
-    if (len(args.output) > 0): save_output(args.output, "", True)
+    if (args.output != None): save_output(args.output, "", True)
 
     if args.dump:
         generateRegisterDump(args.start_address, args.stop_address, args.slave, separator, args.noerror)
