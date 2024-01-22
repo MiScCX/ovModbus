@@ -7,7 +7,18 @@ The following main tasks can be called up:
 - Read out Ovum heat pump Modbus map
 - Create configuration for Home Assistant which then creates all Ovum heat pump parameters as sensors
 
+1. [Installation](#installation)
+2. [Usage](#usage)
+3. [Examples](#examples)
+4. [Modbus TCP](#modbustcp)
+5. [Modbus RTU](#modbusrtu)
+6. [Create a DUMP of a holding register](#dump)
+7. [Create a Ovum Heatpump Modbus Map](#ovummap)
+8. [Create a YAML/Configuration for Home Assistant and the sensors for Ovum heatpump](#hass)
+9. [All Options](#options)
+
 ## Installation
+<a name="installation"></a>
 
 Before using this script, you need to install the required Python libraries. You can do this using pip:
 
@@ -17,23 +28,27 @@ pip install python-slugify
 ```
 
 ## Usage
+<a name="usage"></a>
 
 ```bash
 python ovModbus.py [OPTIONS]
 ```
 ## Examples
-
+<a name="examples"></a>
 ### Modbus TCP
+<a name="modbustcp"></a>
 ```bash
 python ovModbus.py TCP 247 --host 192.168.1.100 --port 502 [OPTIONS]
 ```
 
 ### Modbus RTU
+<a name="modbusrtu"></a>
 ```bash
 python ovModbus.py RTU 247 --comport /dev/ttyUSB0 --baudrate 19200 --parity E --stopbits 1 [OPTIONS]
 ```
 
 ### 1. Create Dump
+<a name="dump"></a>
 Connect to Host ```192.168.1.100``` Port ```502``` and Slave ```247```
 
 Read holding Register (as a Dump) address ```12288``` until address ```18408``` and save output in a file ```modbus.dump```
@@ -57,6 +72,7 @@ Idx	AddrHex	AddrDec	Hex	Byte_1	Byte_2	UInt16	Int16	Chr	Bin
 ```
 
 ### 2. Read/Create Ovum Heatpumnp Modbus Map
+<a name="ovummap"></a>
 Connect to Host ```192.168.1.100``` Port ```502``` and Slave ```247```
 
 Read holding Register from Ovum Heatpump address ```12288``` until address ```18408``` and save output in a file ```modbus.ovum```. Language is set to ```en```
@@ -82,6 +98,7 @@ AddrHex         AddrDec         Param           Int32           Prec            
 ```
 
 ### 3. Create Configuration for Home Assistant and add sensors of the Ovum Heatpumnp Modbus Map
+<a name="hass"></a>
 Connect to Host ```192.168.1.100``` Port ```502``` and Slave ```247```
 
 Read holding Register from Ovum Heatpump address ```12288``` until address ```18408``` and create HASS YAML and save it in a file ```ovum-modbus.yaml```. Language is set to ```en```
@@ -143,6 +160,7 @@ modbus:
 ```
 
 ## Options
+<a name="options"></a>
 
 - **method** (str, TCP):
   - Description: How to connect (TCP or RTU).
