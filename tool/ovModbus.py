@@ -116,7 +116,7 @@ def save_output(filename, content, init=False):
 
 def generate_output(output):
     if args.output != None:
-        save_output(args.output, output)
+        save_output(args.output, f"{output}\n")
     else:
         print(output)
 
@@ -242,10 +242,16 @@ def generateOvumDump(start_address, stop_address, slave, separator, lang, min, n
             unit_text = units.get(f'{unit_id}', {}).get('expected', '') if is_not_menu else ""
             multi_id = response[9]['UInt16'] if (is_not_menu and (response[9]['UInt16'] != "0")) else ""
             if is_not_menu:
-                min_val = response[2]['Int16']
-                max_val = response[3]['Int16']
-                if max_val < min_val:
-                    max_val = response[3]['UInt16']
+                min_val = int(f"{response[2]['hex']}", 16)
+                if min_val > 32767:
+                    min_val -= 65536
+                if (f"{response[2]['bin']}" != "1000000000000000") and (f"{response[2]['bin']}" != "0000000000000000"):
+                    min_val = round(min_val * 10 ** (-precision), precision)
+                max_val = int(f"{response[3]['hex']}", 16)
+                if max_val & 0x80000000:
+                    max_val = -((max_val ^ 0xFFFFFFFF) + 1)
+                if (f"{response[3]['bin']}" != "0111111111111111") and (f"{response[3]['bin']}" != "1111111111111111"):
+                  max_val = round(max_val * 10 ** (-precision), precision)
             else:
                 min_val = ""
                 max_val = ""
