@@ -180,6 +180,7 @@ modbus:
   - Description: Stopbits for RTU Connection.
 - **--lang** (str, default: default):
   - Description: Language Selector (de, en, ...).
+  - FOR GERMAN: Do not use this parameter.
 - **--start_address** (int, default: 12288):
   - Description: Start address of the register.
 - **--stop_address** (int, default: 18408):
