@@ -75,8 +75,8 @@ def get_hass_sensor_def(data):
           swap: word
           unit_of_measurement: "{data['unit']}"
           input_type: holding
-          min_value: {data['min_val']}
-          max_value: {data['max_val']}
+          min_value: {data['min_val'] if int(data['precision']) == 0 else float(data['min_val']) / (10 ** int(data['precision']))}
+          max_value: {data['max_val'] if int(data['precision']) == 0 else float(data['max_val']) / (10 ** int(data['precision']))}
           slave: {data['slave']}                    
           {data['device_class']}"""
     return f"{sensor_string}"
