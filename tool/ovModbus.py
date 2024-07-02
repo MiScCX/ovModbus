@@ -330,7 +330,10 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                         if f"{multi_id}" in item:
                             for tvalue in item[f"{multi_id}"]["tvalues"]:
                                 if len(map) > 0: map += ",\n" + "\t\t\t\t\t"
-                                map += "'" + str(tvalue["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
+                                if tvalue["alphakey"][lang] is None:
+                                  map += "'" + str(tvalue["in_INPUT"]) + "' : ''"
+                                else:
+                                    map += "'" + str(tvalue["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
                                 if len(range) > 0: range += ","
                                 range += str(tvalue["in_INPUT"])
 
@@ -339,7 +342,10 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                 if isEnumValue and (len(range)>0):
                     tempsens_str += f"{get_hass_templatesensor_def(data)}\n"
             else:
-                last_menu = descriptor_text.capitalize()
+                if descriptor_text is None or descriptor_text == "":
+                    last_menu = descriptor_text
+                else:
+                    last_menu = descriptor_text.capitalize()
         idx += read_count
     generate_output(sensor_str)
     generate_output(tempsens_str)
