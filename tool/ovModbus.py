@@ -1,7 +1,7 @@
 #                                                  #
 #      ovNodbus.py  Modbus Analyzer and Output     #
 #                                                  #
-#      Copyright 2023 MiSc                         #
+#      Copyright 2024 MiSc                         #
 #      Shout-out to "final"                        #
 #                                                  #
 #      This code is licensed under the GPL         #
@@ -329,7 +329,7 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                     for item in typeMap:
                         if f"{multi_id}" in item:
                             for tvalue in item[f"{multi_id}"]["tvalues"]:
-                                if len(map) > 0: map += ",\n" + "\t\t\t\t\t"
+                                if len(map) > 0: map += ",\n" + "\t\t\t\t\t" + "\t\t\t\t\t"
                                 if tvalue["alphakey"][lang] is None:
                                   map += "'" + str(tvalue["in_INPUT"]) + "' : ''"
                                 else:
