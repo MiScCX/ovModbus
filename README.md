@@ -23,7 +23,7 @@ The following main tasks can be called up:
 Before using this script, you need to install the required Python libraries. You can do this using pip:
 
 ```bash
-pip install pymodbus
+pip install pymodbus==3.5.2
 pip install python-slugify
 ```
 
