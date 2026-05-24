@@ -2,6 +2,7 @@
   "0": {
     "expected": "°C",
     "device_class": "temperature",
+    "state_class": "measurement",
     "magic_NUM": 0,
     "tlangalphakey": {
       "alphakey": "xUnitCelsius",
@@ -31,6 +32,7 @@
   "1": {
     "expected": "°F",
     "device_class": "temperature",
+    "state_class": "measurement",
     "magic_NUM": 1,
     "tlangalphakey": {
       "alphakey": "xUnitFahrenheit",
@@ -60,6 +62,7 @@
   "2": {
     "expected": "s",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 2,
     "tlangalphakey": {
       "alphakey": "xUnitSeconds",
@@ -89,6 +92,7 @@
   "3": {
     "expected": "min",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 3,
     "tlangalphakey": {
       "alphakey": "xUnitMinutes",
@@ -118,6 +122,7 @@
   "4": {
     "expected": "h",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 4,
     "tlangalphakey": {
       "alphakey": "XValHours",
@@ -147,6 +152,7 @@
   "5": {
     "expected": "days",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 5,
     "tlangalphakey": {
       "alphakey": "xUnitDays",
@@ -176,6 +182,7 @@
   "6": {
     "expected": "s x 10",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 6,
     "tlangalphakey": {
       "alphakey": "xUnit10Seconds",
@@ -205,6 +212,7 @@
   "7": {
     "expected": "min x 10",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 7,
     "tlangalphakey": {
       "alphakey": "xUnit10Minutes",
@@ -234,6 +242,7 @@
   "8": {
     "expected": "h x 10",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 8,
     "tlangalphakey": {
       "alphakey": "xUnitHours",
@@ -263,6 +272,7 @@
   "9": {
     "expected": "days",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 9,
     "tlangalphakey": {
       "alphakey": "xUnitDays",
@@ -292,6 +302,7 @@
   "10": {
     "expected": "bar",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 10,
     "tlangalphakey": {
       "alphakey": "xUnitBar",
@@ -321,6 +332,7 @@
   "11": {
     "expected": "psi",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 11,
     "tlangalphakey": {
       "alphakey": "xUnitPSI",
@@ -350,6 +362,7 @@
   "12": {
     "expected": "atm",
     "device_class": "atmospheric_pressure",
+    "state_class": "measurement",
     "magic_NUM": 12,
     "tlangalphakey": {
       "alphakey": "xUnitAtm",
@@ -379,6 +392,7 @@
   "13": {
     "expected": "%",
     "device_class": "None",
+    "state_class": "measurement",
     "magic_NUM": 13,
     "tlangalphakey": {
       "alphakey": "Percentuale",
@@ -408,6 +422,7 @@
   "14": {
     "expected": "%rH",
     "device_class": "humidity",
+    "state_class": "measurement",
     "magic_NUM": 14,
     "tlangalphakey": {
       "alphakey": "xUnitPercRh",
@@ -437,6 +452,7 @@
   "15": {
     "expected": " ",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 15,
     "tlangalphakey": {
       "alphakey": "XNoMeasureUnit",
@@ -466,6 +482,7 @@
   "16": {
     "expected": "x100 h",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 16,
     "tlangalphakey": {
       "alphakey": "x100hours",
@@ -495,6 +512,7 @@
   "17": {
     "expected": "s/10",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 17,
     "tlangalphakey": {
       "alphakey": "xDecimiSecondo",
@@ -524,6 +542,7 @@
   "18": {
     "expected": "V",
     "device_class": "voltage",
+    "state_class": "measurement",
     "magic_NUM": 18,
     "tlangalphakey": {
       "alphakey": "xUnitVolt",
@@ -553,6 +572,7 @@
   "19": {
     "expected": "ppm",
     "device_class": "volatile_organic_compounds_parts",
+    "state_class": "measurement",
     "magic_NUM": 19,
     "tlangalphakey": {
       "alphakey": "xUnitppm",
@@ -582,6 +602,7 @@
   "20": {
     "expected": "Hertz",
     "device_class": "frequency",
+    "state_class": "measurement",
     "magic_NUM": 20,
     "tlangalphakey": {
       "alphakey": "xUnitHertz",
@@ -611,6 +632,7 @@
   "21": {
     "expected": "1/4 h",
     "device_class": "duration",
+    "state_class": "None",
     "magic_NUM": 21,
     "tlangalphakey": {
       "alphakey": "xUnitQuarterHour",
@@ -640,6 +662,7 @@
   "22": {
     "expected": "rpm",
     "device_class": "speed",
+    "state_class": "measurement",
     "magic_NUM": 22,
     "tlangalphakey": {
       "alphakey": "xUnitRPM",
@@ -669,6 +692,7 @@
   "23": {
     "expected": "Pts",
     "device_class": "distance",
+    "state_class": "measurement",
     "magic_NUM": 23,
     "tlangalphakey": {
       "alphakey": "xpunti",
@@ -698,6 +722,7 @@
   "24": {
     "expected": "Cycles",
     "device_class": "None",
+    "state_class": "measurement",
     "magic_NUM": 24,
     "tlangalphakey": {
       "alphakey": "xUMCycles",
@@ -727,6 +752,7 @@
   "25": {
     "expected": "s/min",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 25,
     "tlangalphakey": {
       "alphakey": "xUMSec/Min",
@@ -756,6 +782,7 @@
   "26": {
     "expected": "s/min/%",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 26,
     "tlangalphakey": {
       "alphakey": "xUMSec/Min/Perc",
@@ -785,6 +812,7 @@
   "27": {
     "expected": "kWh",
     "device_class": "energy",
+    "state_class": "total_increasing",
     "magic_NUM": 27,
     "tlangalphakey": {
       "alphakey": "xUM_kWh",
@@ -814,6 +842,7 @@
   "28": {
     "expected": "l",
     "device_class": "volume",
+    "state_class": "measurement",
     "magic_NUM": 28,
     "tlangalphakey": {
       "alphakey": "xUM_Liters",
@@ -843,6 +872,7 @@
   "29": {
     "expected": "W",
     "device_class": "power",
+    "state_class": "measurement",
     "magic_NUM": 29,
     "tlangalphakey": {
       "alphakey": "xUM_Watt",
@@ -872,6 +902,7 @@
   "30": {
     "expected": "l/min",
     "device_class": "volume",
+    "state_class": "measurement",
     "magic_NUM": 30,
     "tlangalphakey": {
       "alphakey": "xUM_Liters_min",
@@ -901,6 +932,7 @@
   "31": {
     "expected": "ml/s",
     "device_class": "volume",
+    "state_class": "measurement",
     "magic_NUM": 31,
     "tlangalphakey": {
       "alphakey": "xUM_milliliters_sec",
@@ -930,6 +962,7 @@
   "32": {
     "expected": "Pa",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 32,
     "tlangalphakey": {
       "alphakey": "xUnitPascal",
@@ -959,6 +992,7 @@
   "33": {
     "expected": "m3/h",
     "device_class": "volume",
+    "state_class": "measurement",
     "magic_NUM": 33,
     "tlangalphakey": {
       "alphakey": "xUnitM3Hours",
@@ -989,6 +1023,7 @@
     "expected": "100mS",
     "device_class": "speed",
     "device_class": "",
+    "state_class": "measurement",
     "magic_NUM": 34,
     "tlangalphakey": {
       "alphakey": "x100mS",
@@ -1018,6 +1053,7 @@
   "35": {
     "expected": "kW",
     "device_class": "power",
+    "state_class": "measurement",
     "magic_NUM": 35,
     "tlangalphakey": {
       "alphakey": "xUnitkWatt",
@@ -1047,6 +1083,7 @@
   "36": {
     "expected": "0.5 h",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 36,
     "tlangalphakey": {
       "alphakey": "xUM05h",
@@ -1076,6 +1113,7 @@
   "37": {
     "expected": "A",
     "device_class": "current",
+    "state_class": "measurement",
     "magic_NUM": 37,
     "tlangalphakey": {
       "alphakey": "xUnitAmpere",
@@ -1105,6 +1143,7 @@
   "38": {
     "expected": "Kbps",
     "device_class": "data_rate",
+    "state_class": "measurement",
     "magic_NUM": 38,
     "tlangalphakey": {
       "alphakey": "xUnitKbps",
@@ -1134,6 +1173,7 @@
   "40": {
     "expected": "Hzx10",
     "device_class": "frequency",
+    "state_class": "measurement",
     "magic_NUM": 40,
     "tlangalphakey": {
       "alphakey": "KUnit_Hzx10",
@@ -1163,6 +1203,7 @@
   "41": {
     "expected": "Wx10",
     "device_class": "power",
+    "state_class": "measurement",
     "magic_NUM": 41,
     "tlangalphakey": {
       "alphakey": "xUnit_Wx10",
@@ -1192,6 +1233,7 @@
   "42": {
     "expected": "% / Hz",
     "device_class": "frequency",
+    "state_class": "measurement",
     "magic_NUM": 42,
     "tlangalphakey": {
       "alphakey": "xUnit_Perc_Hz",
@@ -1221,6 +1263,7 @@
   "43": {
     "expected": "m3/min",
     "device_class": "speed",
+    "state_class": "measurement",
     "magic_NUM": 43,
     "tlangalphakey": {
       "alphakey": "xUMm3/min",
@@ -1250,6 +1293,7 @@
   "44": {
     "expected": "hPa",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 44,
     "tlangalphakey": {
       "alphakey": "xUMhPa",
@@ -1279,6 +1323,7 @@
   "45": {
     "expected": "kJ/kg",
     "device_class": "energy",
+    "state_class": "total_increasing",
     "magic_NUM": 45,
     "tlangalphakey": {
       "alphakey": "xUMkJ/kg",
@@ -1308,6 +1353,7 @@
   "46": {
     "expected": "Nm",
     "device_class": "distance",
+    "state_class": "measurement",
     "magic_NUM": 46,
     "tlangalphakey": {
       "alphakey": "xum_Nm",
@@ -1337,6 +1383,7 @@
   "47": {
     "expected": "kHz",
     "device_class": "frequency",
+    "state_class": "measurement",
     "magic_NUM": 47,
     "tlangalphakey": {
       "alphakey": "xum_kHz",
@@ -1366,6 +1413,7 @@
   "48": {
     "expected": "mA",
     "device_class": "current",
+    "state_class": "measurement",
     "magic_NUM": 48,
     "tlangalphakey": {
       "alphakey": "xUnitMilliAmpere",
@@ -1395,6 +1443,7 @@
   "49": {
     "expected": "mH",
     "device_class": "None",
+    "state_class": "measurement",
     "magic_NUM": 49,
     "tlangalphakey": {
       "alphakey": "xUnitMilliHenry",
@@ -1424,6 +1473,7 @@
   "50": {
     "expected": "rpm/s",
     "device_class": "speed",
+    "state_class": "measurement",
     "magic_NUM": 50,
     "tlangalphakey": {
       "alphakey": "xUnitRPMS",
@@ -1453,6 +1503,7 @@
   "51": {
     "expected": "A/10",
     "device_class": "current",
+    "state_class": "measurement",
     "magic_NUM": 51,
     "tlangalphakey": {
       "alphakey": "xDecimi_Ampere",
@@ -1482,6 +1533,7 @@
   "52": {
     "expected": "psi x 10",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 52,
     "tlangalphakey": {
       "alphakey": "xUnit10PSI",
@@ -1511,6 +1563,7 @@
   "53": {
     "expected": "°C or Bar",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 53,
     "tlangalphakey": {
       "alphakey": "xUnitCB",
@@ -1540,6 +1593,7 @@
   "54": {
     "expected": "°F or psi x 10",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 54,
     "tlangalphakey": {
       "alphakey": "xUnit_F10PSI",
@@ -1569,6 +1623,7 @@
   "55": {
     "expected": "Bar or V or mA",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 55,
     "tlangalphakey": {
       "alphakey": "xUnit_BVmA",
@@ -1598,6 +1653,7 @@
   "56": {
     "expected": "Psi x 10 or V or mA",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 56,
     "tlangalphakey": {
       "alphakey": "xUnit_10PSIVmA",
@@ -1627,6 +1683,7 @@
   "57": {
     "expected": "500us",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 57,
     "tlangalphakey": {
       "alphakey": "xUnit_halfMS",
@@ -1657,6 +1714,7 @@
     "expected": "kohm",
     "device_class": "duration",
     "device_class": "",
+    "state_class": "None",
     "magic_NUM": 58,
     "tlangalphakey": {
       "alphakey": "xUMkohm",
@@ -1686,6 +1744,7 @@
   "59": {
     "expected": "rps",
     "device_class": "speed",
+    "state_class": "measurement",
     "magic_NUM": 59,
     "tlangalphakey": {
       "alphakey": "xUnitRPS",
@@ -1715,6 +1774,7 @@
   "60": {
     "expected": "K",
     "device_class": "temperature",
+    "state_class": "measurement",
     "magic_NUM": 60,
     "tlangalphakey": {
       "alphakey": "xUnitKelvin",
@@ -1744,6 +1804,7 @@
   "61": {
     "expected": "m3",
     "device_class": "volume",
+    "state_class": "measurement",
     "magic_NUM": 61,
     "tlangalphakey": {
       "alphakey": "xUnitM3",
@@ -1773,6 +1834,7 @@
   "62": {
     "expected": "mm",
     "device_class": "distance",
+    "state_class": "measurement",
     "magic_NUM": 62,
     "tlangalphakey": {
       "alphakey": "xmillimetri",
@@ -1802,6 +1864,7 @@
   "63": {
     "expected": "R",
     "device_class": "None",
+    "state_class": "measurement",
     "magic_NUM": 63,
     "tlangalphakey": {
       "alphakey": "xUnitRankine",
@@ -1831,6 +1894,7 @@
   "64": {
     "expected": "µS",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 64,
     "tlangalphakey": {
       "alphakey": "xUnitµS",
@@ -1860,6 +1924,7 @@
   "65": {
     "expected": "Pa x 10",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 65,
     "tlangalphakey": {
       "alphakey": "UM_Pax10",
@@ -1889,6 +1954,7 @@
   "66": {
     "expected": "mm x10",
     "device_class": "distance",
+    "state_class": "measurement",
     "magic_NUM": 66,
     "tlangalphakey": {
       "alphakey": "xDecineDiMillimetri",
@@ -1918,6 +1984,7 @@
   "67": {
     "expected": "mA",
     "device_class": "current",
+    "state_class": "measurement",
     "magic_NUM": 67,
     "tlangalphakey": {
       "alphakey": "xOVUM_Milliampere",
@@ -1947,6 +2014,7 @@
   "68": {
     "expected": "ms",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 68,
     "tlangalphakey": {
       "alphakey": "xUnitMilliseconds",
@@ -1976,6 +2044,7 @@
   "69": {
     "expected": "BarG",
     "device_class": "pressure",
+    "state_class": "measurement",
     "magic_NUM": 69,
     "tlangalphakey": {
       "alphakey": "xUnitBarG",
@@ -2005,6 +2074,7 @@
   "124": {
     "expected": "x1000 h",
     "device_class": "duration",
+    "state_class": "measurement",
     "magic_NUM": 124,
     "tlangalphakey": {
       "alphakey": "x1000Hours",
@@ -2034,6 +2104,7 @@
   "127": {
     "expected": " ",
     "device_class": "None",
+    "state_class": "None",
     "magic_NUM": 127,
     "tlangalphakey": {
       "alphakey": "XNoMeasureUnit",
