@@ -78,7 +78,8 @@ def get_hass_sensor_def(data):
           min_value: {data['min_val'] if int(data['precision']) == 0 else float(data['min_val']) / (10 ** int(data['precision']))}
           max_value: {data['max_val'] if int(data['precision']) == 0 else float(data['max_val']) / (10 ** int(data['precision']))}
           slave: {data['slave']}                    
-          {data['device_class']}"""
+          {data['device_class']}
+          {data['state_class']}"""
     return f"{sensor_string}"
 
 def get_hass_templatesensor_def(data):
@@ -313,6 +314,8 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                 if unit_text == "": unit_text = units.get(f'{unit_id}', {}).get('expected', '')
                 deviceclass_text = units.get(f'{unit_id}', {}).get('device_class', '')
                 deviceclass_text = f"device_class: {deviceclass_text}" if (deviceclass_text != "None") and (deviceclass_text.strip() != "") else ""
+                stateclass_text = units.get(f'{unit_id}', {}).get('state_class', '')
+                stateclass_text = f"state_class: {stateclass_text}" if (stateclass_text != "None") and (stateclass_text.strip() != "") else ""
                 if is_not_menu:
                     min_val = response[2]['Int16']
                     max_val = response[3]['Int16']
@@ -333,11 +336,11 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                                 if tvalue["alphakey"][lang] is None:
                                   map += "'" + str(tvalue["in_INPUT"]) + "' : ''"
                                 else:
-                                    map += "'" + str(tvalue["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
+                                    map += "'" + str(tvalu e["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
                                 if len(range) > 0: range += ","
                                 range += str(tvalue["in_INPUT"])
 
-                data = {"sensor": f"{sensor}", "range": f"{range}", "map": f"{map}", "slave": f"{slave}", "description": f"{descriptor_text.strip()}", "parameter": f"{parameter}", "address": f"{address}", "scale": f"{scale}", "precision": f"{precision}", "unit": f"{unit_text}", "device_class": f"{deviceclass_text}", "min_val": f"{min_val}", "max_val": f"{max_val}"}
+                data = {"sensor": f"{sensor}", "range": f"{range}", "map": f"{map}", "slave": f"{slave}", "description": f"{descriptor_text.strip()}", "parameter": f"{parameter}", "address": f"{address}", "scale": f"{scale}", "precision": f"{precision}", "unit": f"{unit_text}", "device_class": f"{deviceclass_text}", "state_class": f"{stateclass_text}", "min_val": f"{min_val}", "max_val": f"{max_val}"}
                 sensor_str += f"{get_hass_sensor_def(data)}\n"
                 if isEnumValue and (len(range)>0):
                     tempsens_str += f"{get_hass_templatesensor_def(data)}\n"
