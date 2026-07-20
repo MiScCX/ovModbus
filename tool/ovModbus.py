@@ -336,7 +336,7 @@ def generateOvumHASS(start_address, stop_address, slave, lang):
                                 if tvalue["alphakey"][lang] is None:
                                   map += "'" + str(tvalue["in_INPUT"]) + "' : ''"
                                 else:
-                                    map += "'" + str(tvalu e["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
+                                    map += "'" + str(tvalue["in_INPUT"]) + "' : '" + tvalue["alphakey"][lang] + "'"
                                 if len(range) > 0: range += ","
                                 range += str(tvalue["in_INPUT"])
 
